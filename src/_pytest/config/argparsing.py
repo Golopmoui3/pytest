@@ -478,6 +478,11 @@ class OptionGroup:
     def _addoption_inner(
         self, opts: tuple[str, ...], attrs: dict[str, Any], allow_reserved: bool
     ) -> None:
+        for opt in opts:
+            if not opt.startswith("-"):
+                raise ValueError(
+                    f"invalid option name {opt!r}: must start with '-' or '--'"
+                )
         if not allow_reserved:
             for opt in opts:
                 if len(opt) >= 2 and opt[0] == "-" and opt[1].islower():

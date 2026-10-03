@@ -122,6 +122,20 @@ class TestParser:
         group._addoption("-x", action="store_true")
         assert len(group.options) == 1
 
+    def test_addoption_invalid_option_name(self, parser: parseopt.Parser) -> None:
+        """Regression test for #13817: a dashless option name must fail cleanly."""
+        with pytest.raises(ValueError) as err:
+            parser.addoption("shuffle")
+        assert str(err.value) == (
+            "invalid option name 'shuffle': must start with '-' or '--'"
+        )
+        # Even a single dashless name among valid ones is rejected, instead of
+        # being silently registered as a positional argument.
+        with pytest.raises(ValueError) as err:
+            parser.addoption("shuffle", "--shuffle")
+        assert "invalid option name 'shuffle'" in str(err.value)
+        assert len(parser._anonymous.options) == 0
+
     def test_parser_addoption(self, parser: parseopt.Parser) -> None:
         group = parser.getgroup("custom options")
         assert len(group.options) == 0
